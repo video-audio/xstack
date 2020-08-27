@@ -30,6 +30,8 @@ const (
 	hChar = 'h'
 )
 
+// ErrZeroN indicates that passed n to Layout function is 0
+// and cann't be processed.
 var ErrZeroN = errors.New("layout for 0 elements couldn't be calculated")
 
 // writeOffsetTo writes offset to w.
@@ -63,7 +65,7 @@ func writeOffsetTo(w io.Writer, c byte, pos uint64) error {
 	return nil
 }
 
-// Layout writes xstack layout description to w.
+// LayoutTo writes xstack layout description to w.
 // Where n is total number of elements in grid.
 func LayoutTo(w io.Writer, n uint64) error {
 	if n == 0 {
