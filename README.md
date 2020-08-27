@@ -9,10 +9,6 @@ Xstack is library for [xstack layouts][ffmpeg-wiki-xstack] generation written in
 
 ## Quick-start
 
-```bash
-$ sudo chmod 777 /var/run/smcroute
-```
-
 ```go
 package main
 
