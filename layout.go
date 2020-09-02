@@ -65,15 +65,18 @@ func writeOffsetTo(w io.Writer, c byte, pos uint64) error {
 	return nil
 }
 
-// LayoutTo writes xstack layout description to w.
-// Where n is total number of elements in grid.
-func LayoutTo(w io.Writer, n uint64) error {
+func layoutTo(w io.Writer, n uint64, align Align) error {
 	if n == 0 {
 		return ErrZeroN
 	}
 
 	cols := uint64(math.Trunc(math.Sqrt(float64(n))))
 	rows := uint64(math.Ceil(float64(n) / float64(cols)))
+
+	if align == AlignHorizontal {
+		cols = rows
+		rows = cols
+	}
 
 	// remaining items to place in grid
 	remaining := n
@@ -105,12 +108,29 @@ func LayoutTo(w io.Writer, n uint64) error {
 	return nil
 }
 
+// LayoutTo writes xstack layout description to w.
+// Where n is total number of elements in grid.
+func LayoutTo(w io.Writer, n uint64) error {
+	return layoutTo(w, n, AlignHorizontal)
+}
+
+// LayoutToWithAlign is same as LayoutTo but with custom align.
+func LayoutToWithAlign(w io.Writer, n uint64, align Align) error {
+	return layoutTo(w, n, align)
+}
+
 // Layout returns xstack layout description as string.
-// Is's just helper function - wrapper around LayoutTo.
+// Is's just helper function - wrapper around LayoutTo with
+// predefined AlignHorizontal.
 func Layout(n uint64) (string, error) {
+	return LayoutWithAlign(n, AlignHorizontal)
+}
+
+// LayoutWithAlign is same as Layout but with custom align.
+func LayoutWithAlign(n uint64, align Align) (string, error) {
 	var b strings.Builder
 
-	if err := LayoutTo(&b, n); err != nil {
+	if err := layoutTo(&b, n, align); err != nil {
 		return "", err
 	}
 

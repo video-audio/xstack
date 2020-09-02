@@ -9,24 +9,26 @@ import (
 
 func TestLayout(t *testing.T) {
 	tests := []struct {
-		n int
+		n     int
+		align xstack.Align
 
 		wlayout string
 		werr    error
 	}{
-		{0, "", xstack.ErrZeroN},
-		{1, "0_0", nil},
-		{2, "0_0|0_h0", nil},
-		{3, "0_0|0_h0|0_h0+h1", nil},
-		{4, "0_0|w0_0|0_h0|w0_h0", nil},
-		{8, "0_0|w0_0|0_h0|w0_h0|0_h0+h1|w0_h0+h1|0_h0+h1+h2|w0_h0+h1+h2", nil},
+		{0, xstack.AlignVertical, "", xstack.ErrZeroN},
+		{1, xstack.AlignVertical, "0_0", nil},
+		{2, xstack.AlignVertical, "0_0|0_h0", nil},
+		{3, xstack.AlignVertical, "0_0|0_h0|0_h0+h1", nil},
+		{4, xstack.AlignVertical, "0_0|w0_0|0_h0|w0_h0", nil},
+		{6, xstack.AlignVertical, "0_0|w0_0|0_h0|w0_h0|0_h0+h1|w0_h0+h1", nil},
+		{8, xstack.AlignVertical, "0_0|w0_0|0_h0|w0_h0|0_h0+h1|w0_h0+h1|0_h0+h1+h2|w0_h0+h1+h2", nil},
 
 		// see https://trac.ffmpeg.org/wiki/Create%20a%20mosaic%20out%20of%20several%20input%20videos%20using%20xstack
-		{9, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1|w0_h0+h1|w0+w1_h0+h1", nil},
+		{9, xstack.AlignVertical, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1|w0_h0+h1|w0+w1_h0+h1", nil},
 
-		{10, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1|w0_h0+h1|w0+w1_h0+h1|0_h0+h1+h2", nil},
+		{10, xstack.AlignVertical, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1|w0_h0+h1|w0+w1_h0+h1|0_h0+h1+h2", nil},
 
-		{15,
+		{15, xstack.AlignVertical,
 			"0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1" +
 				"|w0_h0+h1|w0+w1_h0+h1|0_h0+h1+h2|w0_h0+h1+h2" +
 				"|w0+w1_h0+h1+h2|0_h0+h1+h2+h3|w0_h0+h1+h2+h3" +
@@ -34,7 +36,7 @@ func TestLayout(t *testing.T) {
 			nil},
 
 		// see https://trac.ffmpeg.org/wiki/Create%20a%20mosaic%20out%20of%20several%20input%20videos%20using%20xstack
-		{36,
+		{36, xstack.AlignVertical,
 			"0_0" +
 				"|w0_0" +
 				"|w0+w1_0" +
@@ -73,7 +75,7 @@ func TestLayout(t *testing.T) {
 				"|w0+w1+w2+w3+w4_h0+h1+h2+h3+h4",
 			nil},
 
-		{100,
+		{100, xstack.AlignVertical,
 			"0_0" +
 				"|w0_0" +
 				"|w0+w1_0" +
@@ -153,11 +155,15 @@ func TestLayout(t *testing.T) {
 				"|w0+w1+w2+w3+w4+w5+w6_h0+h1+h2+h3+h4+h5+h6+h7+h8" +
 				"|w0+w1+w2+w3+w4+w5+w6+w7_h0+h1+h2+h3+h4+h5+h6+h7+h8" +
 				"|w0+w1+w2+w3+w4+w5+w6+w7+w8_h0+h1+h2+h3+h4+h5+h6+h7+h8", nil},
+
+		{6, xstack.AlignHorizontal, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0", nil},
+		// see https://trac.ffmpeg.org/wiki/Create%20a%20mosaic%20out%20of%20several%20input%20videos%20using%20xstack
+		{9, xstack.AlignHorizontal, "0_0|w0_0|w0+w1_0|0_h0|w0_h0|w0+w1_h0|0_h0+h1|w0_h0+h1|w0+w1_h0+h1", nil},
 	}
 
 	for i, tt := range tests {
 		func() {
-			layout, err := xstack.Layout(uint64(tt.n))
+			layout, err := xstack.LayoutWithAlign(uint64(tt.n), tt.align)
 
 			if !errors.Is(err, tt.werr) {
 				t.Errorf("#%d: err = %v, want %v", i, err, tt.werr)
